@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pachong Spider</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 16L4 6M16 16L2 16M16 16L4 27M16 16L28 6M16 16L30 16M16 16L28 27' stroke='%2338e1ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23ff2e88'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <g stroke="#38e1ff" stroke-width="1.6" fill="none">
+          <path d="M16 16 L6 8 L2 12 M16 16 L5 15 L1 19 M16 16 L7 22 L4 29 M16 16 L26 8 L30 12 M16 16 L27 15 L31 19 M16 16 L25 22 L28 29"/>
+        </g>
+        <g fill="#ff2e88"><circle cx="6" cy="8" r="1.6"/><circle cx="5" cy="15" r="1.6"/><circle cx="7" cy="22" r="1.6"/><circle cx="26" cy="8" r="1.6"/><circle cx="27" cy="15" r="1.6"/><circle cx="25" cy="22" r="1.6"/></g>
+        <rect x="13.5" y="11" width="5" height="10" rx="1" fill="#0b2b33" stroke="#38e1ff"/>
+      </svg>
+      爬虫 <small>Pachong Spider</small>
+    </div>
+    <form class="crawl-form" id="crawlForm">
+      <input type="url" id="seedUrl" required placeholder="https://en.wikipedia.org/wiki/Spider" value="https://en.wikipedia.org/wiki/Spider" aria-label="起始 URL">
+      <label title="最多抓取页面数">页数 <input type="number" id="maxPages" value="20" min="1" max="2000"></label>
+      <label title="最大链接深度">深度 <input type="number" id="maxDepth" value="1" min="0" max="10"></label>
+      <label><input type="checkbox" id="sameDomain" checked> 同域</label>
+      <button class="primary" type="submit" id="startBtn">开始爬取</button>
+    </form>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <section class="side-section">
+        <h3>爬取任务 <button class="ghost" id="refreshBtn" title="刷新">↻</button></h3>
+        <ul class="list crawl-list" id="crawlList"></ul>
+      </section>
+      <section class="side-section grow">
+        <h3><span>页面 <span id="pageCount"></span></span></h3>
+        <ul class="list page-list" id="pageList"></ul>
+      </section>
+      <section class="side-section">
+        <h3>实时日志</h3>
+        <ul class="log" id="log"></ul>
+      </section>
+    </aside>
+
+    <main class="main">
+      <div class="toolbar">
+        <div class="tabs" role="tablist">
+          <button class="on" data-view="spider" role="tab">蜘蛛视图</button>
+          <button data-view="data" role="tab">数据</button>
+        </div>
+        <div class="ctl" id="spiderCtl">
+          <label>蜘蛛 <select id="spiderCount"><option>1</option><option>2</option><option selected>3</option></select></label>
+          <label>速度 <input type="range" id="speed" min="0.3" max="3" step="0.1" value="1"></label>
+          <label><input type="checkbox" id="follow" checked> 镜头跟随</label>
+          <button id="pauseBtn">暂停</button>
+          <button id="resetBtn">重置</button>
+          <button class="danger" id="stopBtn" hidden>停止爬取</button>
+        </div>
+        <div class="stats">
+          <span>页面 <b id="sPages">0</b></span>
+          <span>链接 <b id="sLinks">0</b></span>
+          <span>已吃 <b id="sEaten">0</b></span>
+        </div>
+      </div>
+
+      <section class="view on" id="view-spider">
+        <div class="stage" id="stage">
+          <article class="page" id="page"></article>
+        </div>
+        <canvas class="stage-canvas" id="canvas"></canvas>
+        <div class="empty" id="empty">
+          <h2>放一只蜘蛛出去</h2>
+          <p>输入起始 URL，点击 <b>开始爬取</b>。蜘蛛会在页面上爬行、抓取链接，<br>后端同时广度优先抓取它们并写入 SQLite。</p>
+          <p>试试 <code>https://en.wikipedia.org/wiki/Spider</code></p>
+        </div>
+      </section>
+
+      <section class="view" id="view-data">
+        <div class="data-wrap">
+          <div class="chips" id="kindChips"></div>
+          <div class="data-bar">
+            <input type="search" id="q" placeholder="搜索 URL 或锚文本…">
+            <button id="exportCsv">导出 CSV</button>
+            <button id="exportJson">导出 JSON</button>
+          </div>
+          <table class="grid">
+            <colgroup><col style="width:42%"><col><col style="width:80px"><col style="width:56px"><col class="c-found" style="width:22%"></colgroup>
+            <thead><tr><th>URL</th><th>锚文本</th><th>类型</th><th>引用</th><th class="found">来源页面</th></tr></thead>
+            <tbody id="linkRows"></tbody>
+          </table>
+          <div class="pager"><span id="pageInfo"></span><button id="prevBtn">上一页</button><button id="nextBtn">下一页</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/static/spider.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
